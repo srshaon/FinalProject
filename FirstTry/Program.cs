@@ -365,7 +365,8 @@ namespace FirstTry
             foreach (var Course in context.Courses)
             {
                 
-                Console.WriteLine("{0}) Course ID: {1}, Course Title: {2}", serial, Course.ID, Course.Title);
+                Console.WriteLine("{0}) Course ID: {1}, Course Title: {2}. Course Start Date: {3}", 
+                    serial, Course.ID, Course.Title, Course.StartDate.ToShortDateString());
 
                 courseIDs.Add(Course.ID);
                 serial++;
@@ -374,8 +375,19 @@ namespace FirstTry
             if (selectedCourse <= courseIDs.Count)
             {
                 ClassSchedule newClassSchedule = new ClassSchedule();
-                Console.Write("Enter the total number of class in the course: ");
-                var totalNumberOfClass = int.Parse(Console.ReadLine());
+                Console.WriteLine("Enter Class Date With Time");
+                var classDateAndTime = DateTime.Parse(Console.ReadLine());
+                var courseStartDate = context.Courses.Find(courseIDs[selectedCourse - 1]).StartDate;
+                if (classDateAndTime > courseStartDate)
+                {
+                    newClassSchedule.ClassDate = classDateAndTime.ToLongDateString();
+                    newClassSchedule.ClassStartTime = classDateAndTime.ToShortTimeString();
+                    newClassSchedule.ClassEndTime = classDateAndTime.AddHours(2).ToShortTimeString();
+                    newClassSchedule.CourseID = courseIDs[selectedCourse - 1];
+                }
+                Console.WriteLine($"So the next class of {context.Courses.Find(courseIDs[selectedCourse - 1]).Title}" +
+                    $" will held on {newClassSchedule.ClassDate} from {newClassSchedule.ClassStartTime}" +
+                    $" to {newClassSchedule.ClassEndTime}");
             }
 
         }

@@ -26,7 +26,13 @@ namespace FirstTry.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ClassTime")
+                    b.Property<string>("ClassDate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClassEndTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClassStartTime")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CourseID")
@@ -48,6 +54,9 @@ namespace FirstTry.Migrations
 
                     b.Property<decimal>("Fees")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("NumberOfClasses")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");

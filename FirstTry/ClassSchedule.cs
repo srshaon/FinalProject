@@ -9,7 +9,10 @@ namespace FirstTry
     public class ClassSchedule
     {
         public int ID { get; set; }
-        public string ClassTime { get; set; }
+        public string ClassDate { get; set; }
+        public string ClassStartTime { get; set; }
+
+        public string ClassEndTime { get; set; }
         public int CourseID { get; set; }
         public Course Course { get; set; }
     }

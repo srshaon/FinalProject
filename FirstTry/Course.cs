@@ -12,6 +12,7 @@ namespace FirstTry
         public string Title { get; set; }
         public decimal Fees { get; set; }
         public DateTime StartDate { get; set; }
+        public int NumberOfClasses { get; set; }
         public int TeacherID { get; set; }
         public Teacher Teacher { get; set; }
         public List<CourseStudent> EnrolledStudents { get; set; }
