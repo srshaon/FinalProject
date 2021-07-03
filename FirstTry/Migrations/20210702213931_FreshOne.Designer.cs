@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FirstTry.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    [Migration("20210630082009_FreshOne")]
+    [Migration("20210702213931_FreshOne")]
     partial class FreshOne
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,6 +21,32 @@ namespace FirstTry.Migrations
                 .HasAnnotation("ProductVersion", "5.0.7")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("FirstTry.ClassSchedule", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ClassDate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClassEndTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClassStartTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CourseID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CourseID");
+
+                    b.ToTable("classSchedules");
+                });
+
             modelBuilder.Entity("FirstTry.Course", b =>
                 {
                     b.Property<int>("ID")
@@ -30,6 +56,9 @@ namespace FirstTry.Migrations
 
                     b.Property<decimal>("Fees")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("NumberOfClasses")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -81,6 +110,12 @@ namespace FirstTry.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("ID");
 
                     b.ToTable("Students");
@@ -99,7 +134,13 @@ namespace FirstTry.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SalaryType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -126,6 +167,17 @@ namespace FirstTry.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("FirstTry.ClassSchedule", b =>
+                {
+                    b.HasOne("FirstTry.Course", "Course")
+                        .WithMany("Classes")
+                        .HasForeignKey("CourseID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("FirstTry.Course", b =>
@@ -160,6 +212,8 @@ namespace FirstTry.Migrations
 
             modelBuilder.Entity("FirstTry.Course", b =>
                 {
+                    b.Navigation("Classes");
+
                     b.Navigation("EnrolledStudents");
                 });
 

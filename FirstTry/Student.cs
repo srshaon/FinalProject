@@ -12,6 +12,10 @@ namespace FirstTry
         public string Name { get; set; }
         public int Age { get; set; }
         public string HomeTown { get; set; }
+
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        //public User User { get; set; }
         public List<CourseStudent> AssignedCourses { get; set; }
 
     }

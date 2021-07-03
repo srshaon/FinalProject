@@ -15,7 +15,9 @@ namespace FirstTry.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Age = table.Column<int>(type: "int", nullable: false),
-                    HomeTown = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    HomeTown = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,7 +32,9 @@ namespace FirstTry.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SalaryType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Designation = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Designation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,9 +47,9 @@ namespace FirstTry.Migrations
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    UserType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,6 +65,7 @@ namespace FirstTry.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Fees = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NumberOfClasses = table.Column<int>(type: "int", nullable: false),
                     TeacherID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -70,6 +75,28 @@ namespace FirstTry.Migrations
                         name: "FK_Courses_Teachers_TeacherID",
                         column: x => x.TeacherID,
                         principalTable: "Teachers",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "classSchedules",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClassDate = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClassStartTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClassEndTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CourseID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_classSchedules", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_classSchedules_Courses_CourseID",
+                        column: x => x.CourseID,
+                        principalTable: "Courses",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -100,6 +127,11 @@ namespace FirstTry.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_classSchedules_CourseID",
+                table: "classSchedules",
+                column: "CourseID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Courses_TeacherID",
                 table: "Courses",
                 column: "TeacherID");
@@ -112,6 +144,9 @@ namespace FirstTry.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "classSchedules");
+
             migrationBuilder.DropTable(
                 name: "CourseStudent");
 
