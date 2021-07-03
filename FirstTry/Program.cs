@@ -664,18 +664,33 @@ namespace FirstTry
                 }
                 var selectedCourse = int.Parse(Console.ReadLine())-1;
                 var selectedCourseID = coursesID[selectedCourse];
-                foreach (ClassSchedule cs in context.ClassSchedules)
+                var classCount = GetCourses(selectedCourseID);
+                if (classCount > 0)
                 {
-                    if (selectedCourseID == cs.CourseID)
+                    foreach (ClassSchedule cs in context.ClassSchedules)
                     {
-                        var dateOne = DateTime.Now;
-                        var dateTwo = DateTime.Parse(cs.ClassDate);
-                        //dateTwo.AddHours(DateTime.TryParseExact(cs.ClassStartTime, "hh:mm:ss tt"));
-                        if(dateOne.Date <= dateTwo.Date)
-                        Console.WriteLine(cs.ClassDate + " " + cs.ClassStartTime);
+                        if (selectedCourseID == cs.CourseID)
+                        {
 
+
+                            {
+                                var dateOne = DateTime.Now;
+                                var dateTwo = DateTime.Parse(cs.ClassDate);
+                                //dateTwo.AddHours(DateTime.TryParseExact(cs.ClassStartTime, "hh:mm:ss tt"));
+                                if (dateOne.Date <= dateTwo.Date)
+                                    Console.WriteLine(cs.ClassDate + " " + cs.ClassStartTime);
+                            }
+                        
+
+
+                        }
                     }
                 }
+                else
+                {
+                    Console.WriteLine("No Scheduled class for this course");
+                }
+
 
             }
             
@@ -683,12 +698,12 @@ namespace FirstTry
             
             
         }
-        public static void GetCourses()
+        public static int GetCourses(int id)
         {
             var context = new ProjectDbContext();
-            var getCourse = context.Courses.Where(x => x.ID == 1).Include("Classes").ToList();
+            var getCourse = context.Courses.Where(x => x.ID == id).Include("Classes").ToList();
             var x = getCourse[0].Classes.Count;
-            Console.WriteLine(x);
+            return x;
         }
         public static void GiveAttendance(int id)
         {
