@@ -17,7 +17,8 @@ namespace FirstTry
             //context.Users.Add(userOne);
 
             //context.SaveChanges();
-
+            //string tikmark = ((char)0x221A).ToString();
+            //Console.WriteLine(tikmark);
 
             Console.WriteLine("Enter your UserName and Password to log in.");
             Console.Write("Username: ");
@@ -133,7 +134,42 @@ namespace FirstTry
             }
             else if(userType == "Teacher")
             {
-                Console.WriteLine("Done");
+                var teacherId = 0;
+                foreach (Teacher t in context.Teachers)
+                {
+                    if (userName == t.UserName)
+                    {
+                        teacherId = t.ID;
+                        break;
+                    }
+                }
+                int count = 1;
+                for (int i = 0; i < count; i++)
+                {
+                    TeacherOptions();
+                    var teacherInput = Console.ReadLine();
+                    if (teacherInput.ToLower() != "logout" && teacherInput != string.Empty)
+                    {
+                        if (teacherInput == "1")
+                        {
+                            GetSchedules(teacherId);
+                        }
+                        else if (teacherInput == "2")
+                        {
+                            Console.WriteLine("Enter a student id to check: ");
+                            var studentID = int.Parse(Console.ReadLine());
+                            CheckAttendance(studentID);
+
+
+                        }
+                        count++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                
             }
 
         }
@@ -154,6 +190,13 @@ namespace FirstTry
             Console.WriteLine("Type \"logout\" to close the programe Or Select One from the list");
             Console.WriteLine("1) Watch upcoming schedules of classes");
             Console.WriteLine("2) Give Attendance");
+        }
+        public static void TeacherOptions()
+        {
+            Console.WriteLine();
+            Console.WriteLine("Type \"logout\" to close the programe Or Select One from the list");
+            Console.WriteLine("1) Watch upcoming schedules of classes");
+            Console.WriteLine("2) Check Student Attendance");
         }
         public static void CreateStudent()
         {
@@ -701,6 +744,7 @@ namespace FirstTry
         public static int GetCourses(int id)
         {
             var context = new ProjectDbContext();
+            
             var getCourse = context.Courses.Where(x => x.ID == id).Include("Classes").ToList();
             var x = getCourse[0].Classes.Count;
             return x;
@@ -827,6 +871,126 @@ namespace FirstTry
                 }
 
             }
+        }
+
+        public static void CheckAttendance(int id)
+        {
+
+            var context = new ProjectDbContext();
+            var getAttendance = context.StudentAttendances.Where(x => x.StudentID == id).ToList();
+            List<String> classDates = new List<String>();
+            foreach (StudentAttendance sa in getAttendance)
+            {
+                classDates.Add(getAttendance[0].AttendanceDate.ToShortDateString());
+            }
+            var getCourse = context.Students.Where(x => x.ID == id).Include("AssignedCourses").ToList();
+            int[] coursesID = new int[getCourse[0].AssignedCourses.Count];
+            string[] coursesName = new string[getCourse[0].AssignedCourses.Count];
+            //List<string> classSchedules = new List<string>(); 
+
+            int index = 0;
+            foreach (CourseStudent cs in getCourse[0].AssignedCourses)
+            {
+
+                coursesID[index] = cs.CourseID;
+                index++;
+            }
+            index = 0;
+            foreach (int cid in coursesID)
+            {
+                foreach (Course c in context.Courses)
+                {
+                    if (cid == c.ID)
+                    {
+                        coursesName[index] = c.Title;
+                        index++;
+                        break;
+                    }
+                }
+            }
+            index = 0;
+            if (coursesName.Length < 0)
+            {
+                Console.WriteLine("Student haven't enrolled in any course");
+            }
+            else
+            {
+                Console.WriteLine("Select a course to see attendances");
+
+                for (int i = 0; i < coursesName.Length; i++)
+                {
+                    Console.WriteLine($"{i + 1}) Course Title: {coursesName[i]}, Course ID: {coursesID[i]}");
+                }
+                var selectedCourse = int.Parse(Console.ReadLine()) - 1;
+                var selectedCourseID = coursesID[selectedCourse];
+                List<String> classScheduleDates = new List<String>();
+                var classCount = GetCourses(selectedCourseID);
+                if (classCount > 0)
+                {
+                    foreach (ClassSchedule cs in context.ClassSchedules)
+                    {
+                        if (selectedCourseID == cs.CourseID)
+                        {
+
+                            classScheduleDates.Add(cs.ClassDate);
+
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No Scheduled class for this course");
+                }
+                string tikMark = ((char)0x221A).ToString();
+                string croosMark = "c";
+                foreach (string classToCheck in classScheduleDates)
+                {
+                    foreach(string attendenClass in classDates)
+                    {
+                        if(classToCheck == attendenClass)
+                        {
+                            Console.WriteLine($"student has attended the class " +
+                                $"{classScheduleDates.IndexOf(classToCheck)+1} held on {classToCheck} " +
+                                $"{tikMark}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"student hasn't attended the class " +
+                                $"{classScheduleDates.IndexOf(classToCheck) + 1} " +
+                                $"held on {classToCheck} X");
+                        }
+                    }
+                }
+
+
+
+            }
+
+            //List<StudentAttendance> getAttendance = context.StudentAttendances.Where(x => x.StudentID == id).ToList();
+            //foreach(StudentAttendance sa in getAttendance)
+            //{
+            //    if(sa.)
+            //}
+
+        }
+        
+        public static void GetSchedulesForTeacher(int id)
+        {
+            var context = new ProjectDbContext();
+            var getCourse = context.Courses.Where(x => x.ID == id).Include("Classes").ToList();
+            List<String> getClassSchedules = new List<string>();
+            foreach(ClassSchedule cs in getCourse[0].Classes)
+            {
+                if (DateTime.Parse(cs.ClassDate).Date >= DateTime.Now.Date)
+                {
+                    getClassSchedules.Add(cs.ClassDate + " " + cs.ClassStartTime);
+                }
+            }
+            for(int i = 0; i < getClassSchedules.Count; i++)
+            {
+                Console.WriteLine(getClassSchedules[i]);
+            }
+
         }
 
     }
