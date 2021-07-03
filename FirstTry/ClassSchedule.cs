@@ -15,5 +15,6 @@ namespace FirstTry
         public string ClassEndTime { get; set; }
         public int CourseID { get; set; }
         public Course Course { get; set; }
+        public List<StudentAttendance> Attendances { get; set; }
     }
 }

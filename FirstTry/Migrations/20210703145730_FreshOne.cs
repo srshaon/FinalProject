@@ -16,8 +16,8 @@ namespace FirstTry.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Age = table.Column<int>(type: "int", nullable: false),
                     HomeTown = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -33,8 +33,8 @@ namespace FirstTry.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SalaryType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Designation = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -47,9 +47,9 @@ namespace FirstTry.Migrations
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -80,7 +80,7 @@ namespace FirstTry.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "classSchedules",
+                name: "ClassSchedules",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -92,9 +92,9 @@ namespace FirstTry.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_classSchedules", x => x.ID);
+                    table.PrimaryKey("PK_ClassSchedules", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_classSchedules_Courses_CourseID",
+                        name: "FK_ClassSchedules_Courses_CourseID",
                         column: x => x.CourseID,
                         principalTable: "Courses",
                         principalColumn: "ID",
@@ -126,9 +126,34 @@ namespace FirstTry.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "StudentAttendances",
+                columns: table => new
+                {
+                    ClassScheduleID = table.Column<int>(type: "int", nullable: false),
+                    StudentID = table.Column<int>(type: "int", nullable: false),
+                    AttendanceDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentAttendances", x => new { x.ClassScheduleID, x.StudentID });
+                    table.ForeignKey(
+                        name: "FK_StudentAttendances_ClassSchedules_ClassScheduleID",
+                        column: x => x.ClassScheduleID,
+                        principalTable: "ClassSchedules",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentAttendances_Students_StudentID",
+                        column: x => x.StudentID,
+                        principalTable: "Students",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_classSchedules_CourseID",
-                table: "classSchedules",
+                name: "IX_ClassSchedules_CourseID",
+                table: "ClassSchedules",
                 column: "CourseID");
 
             migrationBuilder.CreateIndex(
@@ -140,24 +165,32 @@ namespace FirstTry.Migrations
                 name: "IX_CourseStudent_StudentID",
                 table: "CourseStudent",
                 column: "StudentID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentAttendances_StudentID",
+                table: "StudentAttendances",
+                column: "StudentID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "classSchedules");
+                name: "CourseStudent");
 
             migrationBuilder.DropTable(
-                name: "CourseStudent");
+                name: "StudentAttendances");
 
             migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Courses");
+                name: "ClassSchedules");
 
             migrationBuilder.DropTable(
                 name: "Students");
+
+            migrationBuilder.DropTable(
+                name: "Courses");
 
             migrationBuilder.DropTable(
                 name: "Teachers");

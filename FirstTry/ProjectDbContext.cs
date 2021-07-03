@@ -31,6 +31,9 @@ namespace FirstTry
             builder.Entity<CourseStudent>()
                 .HasKey(cs => new { cs.CourseID, cs.StudentID });
 
+            builder.Entity<StudentAttendance>()
+                .HasKey(cs => new { cs.ClassScheduleID, cs.StudentID });
+
 
             builder.Entity<CourseStudent>()
                 .HasOne(pc => pc.Course)
@@ -59,8 +62,8 @@ namespace FirstTry
         public DbSet<Course> Courses { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<ClassSchedule> classSchedules { get; set; }
-
+        public DbSet<ClassSchedule> ClassSchedules { get; set; }
+        public DbSet<StudentAttendance> StudentAttendances { get; set; }
 
     }
 }

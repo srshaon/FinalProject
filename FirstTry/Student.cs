@@ -17,6 +17,7 @@ namespace FirstTry
         public string Password { get; set; }
         //public User User { get; set; }
         public List<CourseStudent> AssignedCourses { get; set; }
+        public List<StudentAttendance> Attendances { get; set; }
 
     }
 }

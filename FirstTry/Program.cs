@@ -17,7 +17,7 @@ namespace FirstTry
             //context.Users.Add(userOne);
 
             //context.SaveChanges();
-           
+
 
             Console.WriteLine("Enter your UserName and Password to log in.");
             Console.Write("Username: ");
@@ -331,7 +331,7 @@ namespace FirstTry
                 }
             }
 
-            Console.Write("Student log in Password: ");
+            Console.Write("Teacher log in Password: ");
             var password = Console.ReadLine();
 
             newTeacher.Name = teacherName;
@@ -573,7 +573,7 @@ namespace FirstTry
             if (selectedCourse <= courseIDs.Count)
             {
                 int count = 0;
-                foreach (ClassSchedule cs in context.classSchedules)
+                foreach (ClassSchedule cs in context.ClassSchedules)
                 {
                     if (cs.CourseID == courseIDs[selectedCourse - 1])
                     {
@@ -595,7 +595,7 @@ namespace FirstTry
                         newClassSchedule.ClassEndTime = classDateAndTime.AddHours(2).ToShortTimeString();
                         newClassSchedule.CourseID = courseIDs[selectedCourse - 1];
 
-                        context.classSchedules.Add(newClassSchedule);
+                        context.ClassSchedules.Add(newClassSchedule);
 
                         Console.WriteLine($"So class {count + 1} of {context.Courses.Find(courseIDs[selectedCourse - 1]).Title}" +
                         $" will held on {newClassSchedule.ClassDate} from {newClassSchedule.ClassStartTime}" +
@@ -664,7 +664,7 @@ namespace FirstTry
                 }
                 var selectedCourse = int.Parse(Console.ReadLine())-1;
                 var selectedCourseID = coursesID[selectedCourse];
-                foreach (ClassSchedule cs in context.classSchedules)
+                foreach (ClassSchedule cs in context.ClassSchedules)
                 {
                     if (selectedCourseID == cs.CourseID)
                     {
@@ -741,47 +741,70 @@ namespace FirstTry
                 {
                     if (selectedCourseID == c.ID)
                     {
+                        
                         SortedList<DateTime, string> classDates = new SortedList<DateTime,string>();
+                        SortedList<DateTime, int> classScheduleIDs = new SortedList<DateTime, int>();
                         var context2 = new ProjectDbContext();
                         var getCourse = context2.Courses.Where(x => x.ID == selectedCourseID).Include("Classes").ToList();
-                        foreach(ClassSchedule cs in getCourse[0].Classes)
+                        var classCount = getCourse[0].Classes.Count;
+                        if (classCount == 0)
                         {
-                            if(DateTime.Now.Date<=DateTime.Parse(cs.ClassDate).Date)
-                            classDates.Add(DateTime.Parse(cs.ClassDate),cs.ClassStartTime);
+                            Console.WriteLine("No scheduled class for this course");
                         }
-                        
-                        foreach(DateTime d in classDates.Keys)
+                        else 
                         {
-                            if (d.Date == DateTime.Now.Date)
+                            foreach (ClassSchedule cs in getCourse[0].Classes)
                             {
-                                var stringStartTime = d.ToShortDateString() + " " + classDates.GetValueOrDefault(d);
-                                var startTime = DateTime.Parse(stringStartTime);
-                                //var stringEndTime = cs.ClassDate + " " + cs.ClassEndTime;
-                                //var endTime = DateTime.Parse(stringEndTime);
-
-                                if (DateTime.Now > startTime && DateTime.Now < startTime.AddHours(2))
-                                {
-                                    Console.WriteLine("Attendance Done");
-                                    
-
-                                }
-                                else if (DateTime.Now < startTime)
-                                {
-                                    Console.WriteLine("Class haven't started yet");
-                                    
-                                }
-                                else if (DateTime.Now > startTime.AddHours(2))
-                                {
-                                    Console.WriteLine("Class ended");
-                                }
-                                break;
+                                if (DateTime.Now.Date <= DateTime.Parse(cs.ClassDate).Date)
+                                    classDates.Add(DateTime.Parse(cs.ClassDate), cs.ClassStartTime);
+                                classScheduleIDs.Add(DateTime.Parse(cs.ClassDate), cs.ID);
                             }
-                            else
+
+                            foreach (DateTime d in classDates.Keys)
                             {
-                                Console.WriteLine("No scheduled class today");
-                                break;
+                                if (d.Date == DateTime.Now.Date)
+                                {
+                                    var stringStartTime = d.ToShortDateString() + " " + classDates.GetValueOrDefault(d);
+                                    var startTime = DateTime.Parse(stringStartTime);
+                                    //var stringEndTime = cs.ClassDate + " " + cs.ClassEndTime;
+                                    //var endTime = DateTime.Parse(stringEndTime);
+
+                                    if (DateTime.Now > startTime && DateTime.Now < startTime.AddHours(2))
+                                    {
+
+                                        Console.WriteLine("Attendance Done");
+                                        var context3 = new ProjectDbContext();
+                                        var newAttendance = new StudentAttendance();
+
+                                        newAttendance.StudentID = id;
+                                        newAttendance.AttendanceDate = DateTime.Now;
+                                        newAttendance.ClassScheduleID = classScheduleIDs.GetValueOrDefault(d);
+
+                                        context3.StudentAttendances.Add(newAttendance);
+                                        context3.SaveChanges();
+
+
+
+
+                                    }
+                                    else if (DateTime.Now < startTime)
+                                    {
+                                        Console.WriteLine("Class haven't started yet");
+
+                                    }
+                                    else if (DateTime.Now > startTime.AddHours(2))
+                                    {
+                                        Console.WriteLine("Class ended");
+                                    }
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("No scheduled class today");
+                                    break;
+                                }
+
                             }
-                            
                         }
                         
 

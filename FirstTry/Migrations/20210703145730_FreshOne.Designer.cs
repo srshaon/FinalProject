@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FirstTry.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    [Migration("20210702213931_FreshOne")]
+    [Migration("20210703145730_FreshOne")]
     partial class FreshOne
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,7 +44,7 @@ namespace FirstTry.Migrations
 
                     b.HasIndex("CourseID");
 
-                    b.ToTable("classSchedules");
+                    b.ToTable("ClassSchedules");
                 });
 
             modelBuilder.Entity("FirstTry.Course", b =>
@@ -119,6 +119,24 @@ namespace FirstTry.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("FirstTry.StudentAttendance", b =>
+                {
+                    b.Property<int>("ClassScheduleID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AttendanceDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ClassScheduleID", "StudentID");
+
+                    b.HasIndex("StudentID");
+
+                    b.ToTable("StudentAttendances");
                 });
 
             modelBuilder.Entity("FirstTry.Teacher", b =>
@@ -210,6 +228,30 @@ namespace FirstTry.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("FirstTry.StudentAttendance", b =>
+                {
+                    b.HasOne("FirstTry.ClassSchedule", "ClassSchedule")
+                        .WithMany("Attendances")
+                        .HasForeignKey("ClassScheduleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FirstTry.Student", "Student")
+                        .WithMany("Attendances")
+                        .HasForeignKey("StudentID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassSchedule");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("FirstTry.ClassSchedule", b =>
+                {
+                    b.Navigation("Attendances");
+                });
+
             modelBuilder.Entity("FirstTry.Course", b =>
                 {
                     b.Navigation("Classes");
@@ -220,6 +262,8 @@ namespace FirstTry.Migrations
             modelBuilder.Entity("FirstTry.Student", b =>
                 {
                     b.Navigation("AssignedCourses");
+
+                    b.Navigation("Attendances");
                 });
 
             modelBuilder.Entity("FirstTry.Teacher", b =>
