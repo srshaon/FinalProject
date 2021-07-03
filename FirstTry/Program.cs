@@ -37,7 +37,7 @@ namespace FirstTry
                     break;
                 }
             }
-            
+            context.SaveChanges();
             if (userType == "Admin")
             {
                 int count = 1;
@@ -45,7 +45,7 @@ namespace FirstTry
                 {
                     AdminOptions();
                     var selectedOption = Console.ReadLine();
-                    if (selectedOption.ToLower() != "end" && selectedOption !=string.Empty)
+                    if (selectedOption.ToLower() != "logout" && selectedOption !=string.Empty)
                     {
                         if (selectedOption == "1")
                         {
@@ -102,16 +102,34 @@ namespace FirstTry
                         break;
                     }
                 }
-                StudentOptions();
-                var studentInput = int.Parse(Console.ReadLine());
-                if (studentInput == 1)
+                
+                int count = 1;
+                for (int i = 0; i < count; i++)
                 {
-                    GetSchedules(studentId);
+                    StudentOptions();
+                    var studentInput = Console.ReadLine();
+                    if (studentInput.ToLower() != "logout" && studentInput != string.Empty)
+                    {
+                        if (studentInput == "1")
+                        {
+                            GetSchedules(studentId);
+                        }
+                        else if (studentInput == "2")
+                        {
+                            
+                            GiveAttendance(studentId);
+                            
+                            
+                        }
+                        count++;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                else if (studentInput == 2)
-                {
-
-                }
+                
+                    
             }
             else if(userType == "Teacher")
             {
@@ -121,7 +139,7 @@ namespace FirstTry
         }
         public static void AdminOptions()
         {
-            Console.WriteLine("Type \"end\" to close the programe Or Select one from the list(enter number only) ");
+            Console.WriteLine("Type \"logout\" to close the programe Or Select one from the list(enter number only) ");
             Console.WriteLine("1) Create a User");
             Console.WriteLine("2) Create a Teacher");
             Console.WriteLine("3) Create a Student");
@@ -132,7 +150,8 @@ namespace FirstTry
         }
         public static void StudentOptions()
         {
-            Console.WriteLine("Select One from the list");
+            Console.WriteLine();
+            Console.WriteLine("Type \"logout\" to close the programe Or Select One from the list");
             Console.WriteLine("1) Watch upcoming schedules of classes");
             Console.WriteLine("2) Give Attendance");
         }
@@ -479,6 +498,8 @@ namespace FirstTry
                 var Fees = decimal.Parse(Console.ReadLine());
                 Console.Write("StartDate: ");
                 var StartDate = DateTime.Parse(Console.ReadLine());
+                Console.Write("Number of classes in the course: ");
+                var classTotal = int.Parse(Console.ReadLine());
 
                 Console.WriteLine("Assign a teacher's ID for the course or enter \"0\" to see all teacher's ID ");
                 var userInput = int.Parse(Console.ReadLine());
@@ -499,6 +520,7 @@ namespace FirstTry
                 newCourse.Fees = Fees;
                 newCourse.StartDate = StartDate;
                 newCourse.TeacherID = TeacherID;
+                newCourse.NumberOfClasses = classTotal;
 
                 var assignCourse = new CourseStudent();
                 assignCourse.Course = newCourse;
@@ -514,13 +536,14 @@ namespace FirstTry
 
             context.Users.Add(newUser);
 
-            context.SaveChanges();
+            
 
             foreach (string name in names)
             {
                 Console.Write(name + ", ");
             }
             Console.WriteLine("sucessfully assigned to {0}", newStudent.Name);
+            context.SaveChanges();
         }
 
         public static void GetAllTeacher()
@@ -594,18 +617,16 @@ namespace FirstTry
 
         }
 
-        public static void EnrolledCourseList(int id)
-        {
-
-        }
+        
         public static void GetSchedules(int id)
         {
             var context = new ProjectDbContext();
             
             //var getStudent = context.Students.Find(id);
             var getStudent = context.Students.Where(x => x.ID == id).Include("AssignedCourses").ToList();
-            int[] coursesID = new int[getStudent[0].AssignedCourses.Count];
+            int[]  coursesID = new int[getStudent[0].AssignedCourses.Count];
             string[] coursesName = new string[getStudent[0].AssignedCourses.Count];
+            //List<string> classSchedules = new List<string>(); 
 
             int index = 0;
             foreach (CourseStudent cs in getStudent[0].AssignedCourses)
@@ -622,9 +643,45 @@ namespace FirstTry
                     if (cid == c.ID)
                     {
                         coursesName[index] = c.Title;
+                        index++;
+                        break;
                     }
                 }
             }
+            index = 0;
+            
+            if (coursesName.Length < 0)
+            {
+                Console.WriteLine("You haven't enrolled in any course");
+            }
+            else
+            {
+                Console.WriteLine("Select a course to see schedules");
+                
+                for (int i = 0; i < coursesName.Length; i++)
+                {
+                    Console.WriteLine($"{i + 1}) {coursesName[i]}");
+                }
+                var selectedCourse = int.Parse(Console.ReadLine())-1;
+                var selectedCourseID = coursesID[selectedCourse];
+                foreach (ClassSchedule cs in context.classSchedules)
+                {
+                    if (selectedCourseID == cs.CourseID)
+                    {
+                        var dateOne = DateTime.Now;
+                        var dateTwo = DateTime.Parse(cs.ClassDate);
+                        //dateTwo.AddHours(DateTime.TryParseExact(cs.ClassStartTime, "hh:mm:ss tt"));
+                        if(dateOne.Date <= dateTwo.Date)
+                        Console.WriteLine(cs.ClassDate + " " + cs.ClassStartTime);
+
+                    }
+                }
+
+            }
+            
+            
+            
+            
         }
         public static void GetCourses()
         {
@@ -633,7 +690,100 @@ namespace FirstTry
             var x = getCourse[0].Classes.Count;
             Console.WriteLine(x);
         }
+        public static void GiveAttendance(int id)
+        {
+            var context = new ProjectDbContext();
 
+            //var getStudent = context.Students.Find(id);
+            var getStudent = context.Students.Where(x => x.ID == id).Include("AssignedCourses").ToList();
+            int[] coursesID = new int[getStudent[0].AssignedCourses.Count];
+            string[] coursesName = new string[getStudent[0].AssignedCourses.Count];
+            //List<string> classSchedules = new List<string>(); 
+
+            int index = 0;
+            foreach (CourseStudent cs in getStudent[0].AssignedCourses)
+            {
+
+                coursesID[index] = cs.CourseID;
+                index++;
+            }
+            index = 0;
+            foreach (int cid in coursesID)
+            {
+                foreach (Course c in context.Courses)
+                {
+                    if (cid == c.ID)
+                    {
+                        coursesName[index] = c.Title;
+                        index++;
+                        break;
+                    }
+                }
+            }
+            index = 0;
+
+            if (coursesName.Length < 0)
+            {
+                Console.WriteLine("You haven't enrolled in any course");
+            }
+            else
+            {
+
+                Console.WriteLine("Selected a course to give attendance: ");
+                for (int i = 0; i < coursesName.Length; i++)
+                {
+                    Console.WriteLine($"{i + 1}) {coursesName[i]}");
+                }
+                
+                var selectedCourse = int.Parse(Console.ReadLine()) - 1;
+                var selectedCourseID = coursesID[selectedCourse];
+                foreach (Course c in context.Courses)
+                {
+                    if (selectedCourseID == c.ID)
+                    {
+                        var context2 = new ProjectDbContext();
+                        var getCourse = context2.Courses.Where(x => x.ID == selectedCourseID).Include("Classes").ToList();
+
+                        foreach(ClassSchedule cs in getCourse[0].Classes)
+                        {
+                            var dateOne = DateTime.Now;
+                            var dateTwo = DateTime.Parse(cs.ClassDate);
+                            if (dateOne.Date == dateTwo.Date)
+                            {
+                                var stringStartTime = cs.ClassDate +" "+ cs.ClassStartTime;
+                                var startTime = DateTime.Parse(stringStartTime);
+                                var stringEndTime = cs.ClassDate + " " + cs.ClassEndTime;
+                                var endTime = DateTime.Parse(stringEndTime);
+
+                                if(dateOne>startTime && dateOne < endTime)
+                                {
+                                    Console.WriteLine("Attendance Done");
+
+                                }
+                                else if(dateOne<startTime)
+                                {
+                                    Console.WriteLine("Class haven't started yet");
+                                }
+                                else if(dateOne>endTime)
+                                {
+                                    Console.WriteLine("Class ended");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("No scheduled class today");
+                            }
+                        }
+
+                        ////dateTwo.AddHours(DateTime.TryParseExact(cs.ClassStartTime, "hh:mm:ss tt"));
+                        //
+                        //    Console.WriteLine(cs.ClassDate + " " + cs.ClassStartTime);
+
+                    }
+                }
+
+            }
+        }
 
     }
 }
