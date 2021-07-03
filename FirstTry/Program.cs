@@ -741,43 +741,49 @@ namespace FirstTry
                 {
                     if (selectedCourseID == c.ID)
                     {
+                        SortedList<DateTime, string> classDates = new SortedList<DateTime,string>();
                         var context2 = new ProjectDbContext();
                         var getCourse = context2.Courses.Where(x => x.ID == selectedCourseID).Include("Classes").ToList();
-
                         foreach(ClassSchedule cs in getCourse[0].Classes)
                         {
-                            var dateOne = DateTime.Now;
-                            var dateTwo = DateTime.Parse(cs.ClassDate);
-                            if (dateOne.Date == dateTwo.Date)
+                            if(DateTime.Now.Date<=DateTime.Parse(cs.ClassDate).Date)
+                            classDates.Add(DateTime.Parse(cs.ClassDate),cs.ClassStartTime);
+                        }
+                        
+                        foreach(DateTime d in classDates.Keys)
+                        {
+                            if (d.Date == DateTime.Now.Date)
                             {
-                                var stringStartTime = cs.ClassDate +" "+ cs.ClassStartTime;
+                                var stringStartTime = d.ToShortDateString() + " " + classDates.GetValueOrDefault(d);
                                 var startTime = DateTime.Parse(stringStartTime);
-                                var stringEndTime = cs.ClassDate + " " + cs.ClassEndTime;
-                                var endTime = DateTime.Parse(stringEndTime);
+                                //var stringEndTime = cs.ClassDate + " " + cs.ClassEndTime;
+                                //var endTime = DateTime.Parse(stringEndTime);
 
-                                if(dateOne>startTime && dateOne < endTime)
+                                if (DateTime.Now > startTime && DateTime.Now < startTime.AddHours(2))
                                 {
                                     Console.WriteLine("Attendance Done");
+                                    
 
                                 }
-                                else if(dateOne<startTime)
+                                else if (DateTime.Now < startTime)
                                 {
                                     Console.WriteLine("Class haven't started yet");
+                                    
                                 }
-                                else if(dateOne>endTime)
+                                else if (DateTime.Now > startTime.AddHours(2))
                                 {
                                     Console.WriteLine("Class ended");
                                 }
+                                break;
                             }
                             else
                             {
                                 Console.WriteLine("No scheduled class today");
+                                break;
                             }
+                            
                         }
-
-                        ////dateTwo.AddHours(DateTime.TryParseExact(cs.ClassStartTime, "hh:mm:ss tt"));
-                        //
-                        //    Console.WriteLine(cs.ClassDate + " " + cs.ClassStartTime);
+                        
 
                     }
                 }
