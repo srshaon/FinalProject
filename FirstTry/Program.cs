@@ -67,7 +67,7 @@ namespace FirstTry
                         }
                         else if (selectedOption == "5")
                         {
-                            AssignStudentsToACourse();
+                            EnrollStudentsToACourse();
                         }
                         else if (selectedOption == "6")
                         {
@@ -397,7 +397,7 @@ namespace FirstTry
 
         }
 
-        public static void AssignStudentsToACourse()
+        public static void EnrollStudentsToACourse()
         {
             var context = new ProjectDbContext();
 
@@ -411,7 +411,9 @@ namespace FirstTry
             var Fees = decimal.Parse(Console.ReadLine());
             Console.Write("StartDate: ");
             var StartDate = DateTime.Parse(Console.ReadLine());
-            
+            Console.Write("Number of classes in the course: ");
+            var classTotal = int.Parse(Console.ReadLine());
+
 
             Console.WriteLine("Assign a teacher's ID for the course or enter \"0\" to see all teacher's ID ");
             var userInput = int.Parse(Console.ReadLine());
@@ -432,7 +434,7 @@ namespace FirstTry
             newCourse.Title = Title;
             newCourse.Fees = Fees;
             newCourse.StartDate = StartDate;
-            
+            newCourse.NumberOfClasses = classTotal;
             newCourse.TeacherID = TeacherID;
 
             newCourse.EnrolledStudents = new List<CourseStudent>();
@@ -451,10 +453,39 @@ namespace FirstTry
                 var studentAge = int.Parse(Console.ReadLine());
                 Console.Write("Student Hometown: ");
                 var studentHometown = Console.ReadLine();
+                int loopLimit = 1;
+                var userName = string.Empty;
+                for (int k = 0; k < loopLimit; k++)
+                {
+                    Console.Write("Student log in UserName: ");
+
+                    userName = Console.ReadLine();
+                    foreach (User user in context.Users)
+                    {
+                        if (userName == user.UserName)
+                        {
+                            Console.WriteLine("Username taken. Try again.");
+                            loopLimit++;
+                            break;
+                        }
+                    }
+                }
+
+                Console.Write("Student log in Password: ");
+                var password = Console.ReadLine();
 
                 newStudent.Name = studentName;
                 newStudent.Age = studentAge;
                 newStudent.HomeTown = studentHometown;
+                newStudent.UserName = userName;
+                newStudent.Password = password;
+
+                User newUser = new User();
+                newUser.UserType = "Student";
+                newUser.UserName = userName;
+                newUser.Password = password;
+
+                context.Users.Add(newUser);
 
                 var assignStudent = new CourseStudent();
                 assignStudent.Student = newStudent;
@@ -881,7 +912,7 @@ namespace FirstTry
             List<String> classDates = new List<String>();
             foreach (StudentAttendance sa in getAttendance)
             {
-                classDates.Add(getAttendance[0].AttendanceDate.ToShortDateString());
+                classDates.Add(getAttendance[0].AttendanceDate.ToLongDateString());
             }
             var getCourse = context.Students.Where(x => x.ID == id).Include("AssignedCourses").ToList();
             int[] coursesID = new int[getCourse[0].AssignedCourses.Count];
@@ -942,35 +973,35 @@ namespace FirstTry
                     Console.WriteLine("No Scheduled class for this course");
                 }
                 string tikMark = ((char)0x221A).ToString();
-                string croosMark = "c";
+                
                 foreach (string classToCheck in classScheduleDates)
                 {
-                    foreach(string attendenClass in classDates)
+                    if(DateTime.Parse(classToCheck).Date<= DateTime.Now.Date)
                     {
-                        if(classToCheck == attendenClass)
+                        foreach (string attendenClass in classDates)
                         {
-                            Console.WriteLine($"student has attended the class " +
-                                $"{classScheduleDates.IndexOf(classToCheck)+1} held on {classToCheck} " +
-                                $"{tikMark}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"student hasn't attended the class " +
-                                $"{classScheduleDates.IndexOf(classToCheck) + 1} " +
-                                $"held on {classToCheck} X");
+                            if (classToCheck == attendenClass)
+                            {
+                                Console.WriteLine($"student has attended the class " +
+                                    $"{classScheduleDates.IndexOf(classToCheck) + 1} held on {classToCheck} " +
+                                    $"{tikMark}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"student hasn't attended the class " +
+                                    $"{classScheduleDates.IndexOf(classToCheck) + 1} " +
+                                    $"held on {classToCheck} X");
+                            }
                         }
                     }
+                    
                 }
 
 
 
             }
 
-            //List<StudentAttendance> getAttendance = context.StudentAttendances.Where(x => x.StudentID == id).ToList();
-            //foreach(StudentAttendance sa in getAttendance)
-            //{
-            //    if(sa.)
-            //}
+           
 
         }
         
