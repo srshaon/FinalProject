@@ -664,16 +664,48 @@ namespace FirstTry
                     var courseStartDate = context.Courses.Find(courseIDs[selectedCourse - 1]).StartDate;
                     if (classDateAndTime > courseStartDate)
                     {
-                        newClassSchedule.ClassDate = classDateAndTime.ToLongDateString();
-                        newClassSchedule.ClassStartTime = classDateAndTime.ToShortTimeString();
-                        newClassSchedule.ClassEndTime = classDateAndTime.AddHours(2).ToShortTimeString();
-                        newClassSchedule.CourseID = courseIDs[selectedCourse - 1];
+                        var condition = 0;
+                        var getSchedules = context.ClassSchedules.Where(x => x.CourseID == courseIDs[selectedCourse - 1]).ToList();
+                        foreach (ClassSchedule cs in getSchedules)
+                        {
+                            if (classDateAndTime.Date == DateTime.Parse(cs.ClassDate).Date)
+                            {
+                                Console.WriteLine("There is already a class scheduled on this day");
+                                condition++;
+                                break;
+                            }
+                            
+                        }
+                        if (condition == 0)
+                        {
+                            newClassSchedule.ClassDate = classDateAndTime.ToLongDateString();
+                            newClassSchedule.ClassStartTime = classDateAndTime.ToShortTimeString();
+                            newClassSchedule.ClassEndTime = classDateAndTime.AddHours(2).ToShortTimeString();
+                            newClassSchedule.CourseID = courseIDs[selectedCourse - 1];
 
-                        context.ClassSchedules.Add(newClassSchedule);
+                            context.ClassSchedules.Add(newClassSchedule);
 
-                        Console.WriteLine($"So class {count + 1} of {context.Courses.Find(courseIDs[selectedCourse - 1]).Title}" +
-                        $" will held on {newClassSchedule.ClassDate} from {newClassSchedule.ClassStartTime}" +
-                        $" to {newClassSchedule.ClassEndTime}");
+                            Console.WriteLine($"So class {count + 1} of {context.Courses.Find(courseIDs[selectedCourse - 1]).Title}" +
+                            $" will held on {newClassSchedule.ClassDate} from {newClassSchedule.ClassStartTime}" +
+                            $" to {newClassSchedule.ClassEndTime}");
+                        }
+                        //foreach(ClassSchedule cs in context.ClassSchedules)
+                        //{
+                        //    if (cs.CourseID == courseIDs[selectedCourse - 1])
+                        //    {
+
+                        //    }
+                        //}
+                        //newClassSchedule.ClassDate = classDateAndTime.ToLongDateString();
+                        //newClassSchedule.ClassStartTime = classDateAndTime.ToShortTimeString();
+                        //newClassSchedule.ClassEndTime = classDateAndTime.AddHours(2).ToShortTimeString();
+                        //newClassSchedule.CourseID = courseIDs[selectedCourse - 1];
+
+                        //context.ClassSchedules.Add(newClassSchedule);
+
+                        //Console.WriteLine($"So class {count + 1} of {context.Courses.Find(courseIDs[selectedCourse - 1]).Title}" +
+                        //$" will held on {newClassSchedule.ClassDate} from {newClassSchedule.ClassStartTime}" +
+                        //$" to {newClassSchedule.ClassEndTime}");
                     }
                     else
                     {
